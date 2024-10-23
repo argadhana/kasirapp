@@ -4,8 +4,8 @@ type Service interface {
 	Save(input CategoryInput) (Category, error)
 	FindByID(ID int) (Category, error)
 	FindAll() ([]Category, error)
-	Update(category Category) (Category, error)
-	Delete(category Category) (Category, error)
+	Update(ID int, input CategoryInput) (Category, error)
+	Delete(ID int) (Category, error)
 }
 
 type service struct {

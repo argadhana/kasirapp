@@ -78,3 +78,54 @@ func (h *categoryHandler) GetCategoryById(c *gin.Context) {
 	response := helper.APIResponse("Success get category", http.StatusOK, "success", formatedCategory)
 	c.JSON(http.StatusOK, response)
 }
+
+func (h *categoryHandler) UpdateCategory(c *gin.Context) {
+	idParam := c.Param("id")
+	id, err := strconv.Atoi(idParam)
+	if err != nil {
+		response := helper.APIResponse("Invalid ID format", http.StatusBadRequest, "error", nil)
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	var input category.CategoryInput
+	err = c.ShouldBindJSON(&input)
+	if err != nil {
+		errors := helper.FormatValidationError(err)
+		errorMessage := gin.H{"errors": errors}
+
+		response := helper.APIResponse("Update category failed", http.StatusUnprocessableEntity, "error", errorMessage)
+		c.JSON(http.StatusUnprocessableEntity, response)
+		return
+	}
+
+	updateCategory, err := h.categoryService.Update(id, input)
+	if err != nil {
+		response := helper.APIResponse("Update category failed", http.StatusBadRequest, "error", nil)
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	response := helper.APIResponse("Success update category", http.StatusOK, "success", category.FormatCategory(updateCategory))
+	c.JSON(http.StatusOK, response)
+}
+
+func (h *categoryHandler) DeleteCategory(c *gin.Context) {
+	idParam := c.Param("id")
+	id, err := strconv.Atoi(idParam)
+	if err != nil {
+		response := helper.APIResponse("Invalid ID format", http.StatusBadRequest, "error", nil)
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	deleteCategory, err := h.categoryService.Delete(id)
+	if err != nil {
+		response := helper.APIResponse("Delete category failed", http.StatusBadRequest, "error", nil)
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	response := helper.APIResponse("Success delete category", http.StatusOK, "success", category.FormatCategory(deleteCategory))
+	c.JSON(http.StatusOK, response)
+}

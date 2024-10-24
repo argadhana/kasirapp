@@ -91,25 +91,21 @@ func (r *repository) Update(ID int, supplier Supplier) (Supplier, error) {
 
 func (r *repository) Delete(ID int) (Supplier, error) {
 	var supplier Supplier
-	err := r.db.Transaction(func(tx *gorm.DB) error {
-		if err := tx.Where("id = ?", ID).First(&supplier).Error; err != nil {
-			if errors.Is(err, gorm.ErrRecordNotFound) {
-				return errors.New("supplier not found")
-			}
-			return err
+
+	err := r.db.Where("id = ?", ID).First(&supplier).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return supplier, errors.New("supplier not found")
 		}
+		return supplier, err
+	}
 
-		if err := tx.Where("id = ?", ID).Delete(&supplier).Error; err != nil {
-			return err
-		}
+	err = r.db.Where("id = ?", ID).Delete(&supplier).Error
+	if err != nil {
+		return supplier, err
+	}
 
-		if err := tx.Exec("UPDATE suppliers SET id = id - 1 WHERE id > ?", ID).Error; err != nil {
-			return err
-		}
-
-		return nil
-	})
-
+	err = r.db.Exec("UPDATE suppliers SET id = id - 1 WHERE id > ?", ID).Error
 	if err != nil {
 		return supplier, err
 	}

@@ -7,3 +7,22 @@ type DiscountFormatter struct {
 	CreatedAt  string  `json:"created_at"`
 	UpdatedAt  string  `json:"updated_at"`
 }
+
+func FormatDiscount(discount Discount) DiscountFormatter {
+	formatter := DiscountFormatter{
+		ID:         discount.ID,
+		Name:       discount.Name,
+		Percentage: discount.Percentage,
+		CreatedAt:  discount.CreatedAt.String(),
+		UpdatedAt:  discount.UpdatedAt.String(),
+	}
+	return formatter
+}
+
+func FormatDiscounts(discounts []Discount) []DiscountFormatter {
+	var formatter []DiscountFormatter
+	for _, discount := range discounts {
+		formatter = append(formatter, FormatDiscount(discount))
+	}
+	return formatter
+}

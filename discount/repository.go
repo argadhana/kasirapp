@@ -67,7 +67,7 @@ func (r *repository) FindAll() ([]Discount, error) {
 	return discounts, nil
 }
 
-func (r *repository) Update(ID int, input DiscountInput) (Discount, error) {
+func (r *repository) Update(ID int, input Discount) (Discount, error) {
 	var discount Discount
 	if err := r.db.Where("id = ?", ID).First(&discount).Error; err != nil {
 		return discount, err

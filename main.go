@@ -4,6 +4,7 @@ import (
 	"api-kasirapp/auth"
 	"api-kasirapp/category"
 	"api-kasirapp/customers"
+	"api-kasirapp/discount"
 	"api-kasirapp/handler"
 	"api-kasirapp/helper"
 	"api-kasirapp/product"
@@ -42,12 +43,14 @@ func main() {
 	productRepository := product.NewRepository(db)
 	customerRepository := customers.NewRepository(db)
 	supplierRepository := supplier.NewRepository(db)
+	discountRepository := discount.NewRepository(db)
 
 	userService := user.NewService(userRepository)
 	categoryService := category.NewService(categoryRepository)
 	productService := product.NewService(productRepository, categoryRepository)
 	customersService := customers.NewService(customerRepository)
 	supplierService := supplier.NewService(supplierRepository)
+	discountService := discount.NewService(discountRepository)
 	authService := auth.NewService()
 
 	userHandler := handler.NewUserHandler(userService, authService)
@@ -55,6 +58,7 @@ func main() {
 	productHandler := handler.NewProductHandler(productService)
 	customerHandler := handler.NewCustomerHandler(customersService)
 	supplierHandler := handler.NewSupplierHandler(supplierService)
+	discountHandler := handler.NewDiscountHandler(discountService)
 	router := gin.Default()
 
 	api := router.Group("/api/v1")
@@ -65,6 +69,7 @@ func main() {
 	api.POST("/products", productHandler.CreateProduct)
 	api.POST("/customers", customerHandler.CreateCustomer)
 	api.POST("/suppliers", supplierHandler.CreateSupplier)
+	api.POST("/discounts", discountHandler.CreateDiscount)
 
 	api.GET("/categories", categoryHandler.GetCategories)
 	api.GET("/categories/:id", categoryHandler.GetCategoryById)
@@ -74,16 +79,20 @@ func main() {
 	api.GET("/customers/:id", customerHandler.GetCustomerById)
 	api.GET("/suppliers", supplierHandler.GetSuppliers)
 	api.GET("/suppliers/:id", supplierHandler.GetSupplierById)
+	api.GET("/discounts", discountHandler.GetDiscounts)
+	api.GET("/discounts/:id", discountHandler.GetDiscountById)
 
 	api.PUT("/categories/:id", categoryHandler.UpdateCategory)
 	api.PUT("/products/:id", productHandler.UpdateProduct)
 	api.PUT("/customers/:id", customerHandler.UpdateCustomer)
 	api.PUT("/suppliers/:id", supplierHandler.UpdateSupplier)
+	api.PUT("/discounts/:id", discountHandler.UpdateDiscount)
 
 	api.DELETE("/categories/:id", categoryHandler.DeleteCategory)
 	api.DELETE("/products/:id", productHandler.DeleteProduct)
 	api.DELETE("/customers/:id", customerHandler.DeleteCustomer)
 	api.DELETE("/suppliers/:id", supplierHandler.DeleteSupplier)
+	api.DELETE("/discounts/:id", discountHandler.DeleteDiscount)
 
 	router.Run()
 }

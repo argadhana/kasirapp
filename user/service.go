@@ -21,7 +21,8 @@ type service struct {
 }
 
 func NewService(repository Repository) *service {
-	return &service{repository}
+	return &service{
+		repository: repository}
 }
 
 func (s *service) RegisterUser(input RegisterUserInput) (User, error) {

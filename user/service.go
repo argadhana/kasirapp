@@ -1,7 +1,9 @@
 package user
 
 import (
+	"api-kasirapp/helper"
 	"errors"
+
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -31,7 +33,17 @@ func (s *service) RegisterUser(input RegisterUserInput) (User, error) {
 	if err != nil {
 		return user, err
 	}
+
 	user.PasswordHash = string(passwordHash)
+	user.Phone = input.Phone
+
+	if err := helper.ValidateEmail(user.Email); err != nil {
+		return User{}, err
+	}
+
+	if err := helper.ValidatePhoneNumber(user.Phone); err != nil {
+		return User{}, err
+	}
 
 	newUser, err := s.repository.Save(user)
 	if err != nil {
@@ -51,7 +63,7 @@ func (s *service) Login(input LoginInput) (User, error) {
 	}
 
 	if user.ID == 0 {
-		return user, errors.New("No user found on that email")
+		return user, errors.New("no user found on that email")
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(password))
@@ -84,7 +96,7 @@ func (s *service) GetUserByID(ID int) (User, error) {
 	}
 
 	if user.ID == 0 {
-		return user, errors.New("No user found with that ID")
+		return user, errors.New("no user found with that id")
 	}
 
 	return user, nil

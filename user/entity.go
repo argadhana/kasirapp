@@ -7,7 +7,7 @@ type User struct {
 	Email        string
 	PasswordHash string
 	Name         string
-	Phone        int
+	Phone        string
 	IsActive     bool
 	CreatedAt    time.Time
 	UpdatedAt    time.Time

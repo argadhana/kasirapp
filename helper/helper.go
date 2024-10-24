@@ -44,7 +44,6 @@ func FormatValidationError(err error) []string {
 }
 
 func ValidatePhoneNumber(phone string) error {
-	// Regular expression to match phone numbers starting with "08" or "628"
 	re := regexp.MustCompile(`^(08|628)[0-9]{8,11}$`)
 	if !re.MatchString(phone) {
 		return errors.New("phone number must start with '08' or '628' and minimum 11 digists and maximum 13 digits long")
@@ -53,7 +52,6 @@ func ValidatePhoneNumber(phone string) error {
 }
 
 func ValidateEmail(email string) error {
-	// Regular expression to match email addresses
 	re := regexp.MustCompile(`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`)
 	if !re.MatchString(email) {
 		return errors.New("invalid email address")

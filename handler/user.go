@@ -4,8 +4,9 @@ import (
 	"api-kasirapp/auth"
 	"api-kasirapp/helper"
 	"api-kasirapp/user"
-	"github.com/gin-gonic/gin"
 	"net/http"
+
+	"github.com/gin-gonic/gin"
 )
 
 type userHandler struct {
@@ -32,14 +33,14 @@ func (h *userHandler) RegisterUser(c *gin.Context) {
 
 	newUser, err := h.userService.RegisterUser(input)
 	if err != nil {
-		response := helper.APIResponse("Register failed", http.StatusBadRequest, "error", nil)
+		response := helper.APIResponse("Register failed", http.StatusBadRequest, "error", gin.H{"message": err.Error()})
 		c.JSON(http.StatusBadRequest, response)
 		return
 	}
 
 	token, err := h.authService.GenerateToken(newUser.ID)
 	if err != nil {
-		response := helper.APIResponse("Register failed", http.StatusBadRequest, "error", nil)
+		response := helper.APIResponse("Register failed", http.StatusBadRequest, "error", gin.H{"message": err.Error()})
 		c.JSON(http.StatusBadRequest, response)
 		return
 	}

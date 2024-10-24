@@ -32,24 +32,22 @@ func (r *repository) Save(product Product) (Product, error) {
 	}
 
 	err := r.db.Transaction(func(tx *gorm.DB) error {
-		// Step 1: Check for the first available ID
 		if err := tx.Raw("SELECT MIN(id) FROM products WHERE id NOT IN (SELECT id FROM products)").Scan(&availableID).Error; err != nil {
 			return err
 		}
 
-		// Step 2: If there's an available ID, assign it to the product
 		if availableID != nil {
-			product.ID = *availableID // Assign available ID
+			product.ID = *availableID
 		} else {
-			// Use the next sequence number or highest ID + 1
-			var maxID *int // Use a pointer to check for NULL
+
+			var maxID *int
 			if err := tx.Model(&Product{}).Select("MAX(id)").Scan(&maxID).Error; err != nil {
 				return err
 			}
 			if maxID != nil {
-				product.ID = *maxID + 1 // Assign next ID if maxID is not nil
+				product.ID = *maxID + 1
 			} else {
-				product.ID = 1 // If maxID is nil, start with ID 1 for the first product
+				product.ID = 1
 			}
 		}
 		if err := tx.Create(&product).Error; err != nil {
@@ -81,6 +79,9 @@ func (r *repository) FindByName(name string) (Product, error) {
 
 	err := r.db.Where("name = ?", name).Find(&product).Error
 	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return product, errors.New("product not found")
+		}
 		return product, err
 	}
 	return product, nil
@@ -109,6 +110,9 @@ func (r *repository) Delete(ID int) (Product, error) {
 	err := r.db.Transaction(func(tx *gorm.DB) error {
 		// Step 1: Find the product to delete
 		if err := tx.Where("id = ?", ID).First(&product).Error; err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				return errors.New("customer not found")
+			}
 			return err
 		}
 

@@ -35,7 +35,7 @@ func (h *productHandler) CreateProduct(c *gin.Context) {
 	newProduct, err := h.productService.CreateProduct(input)
 	if err != nil {
 		if err.Error() == "product code already exists" {
-			response := helper.APIResponse("product code already exists", http.StatusConflict, "error", nil)
+			response := helper.APIResponse("product code already exists", http.StatusConflict, "error", gin.H{"message": err.Error()})
 			c.JSON(http.StatusConflict, response)
 			return
 		}

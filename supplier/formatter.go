@@ -18,6 +18,7 @@ func FormatSupplier(supplier Supplier) SupplierFormatter {
 		Address:   supplier.Address,
 		Email:     supplier.Email,
 		Phone:     supplier.Phone,
+		Code:      supplier.Code,
 		CreatedAt: supplier.CreatedAt.String(),
 		UpdatedAt: supplier.UpdatedAt.String(),
 	}

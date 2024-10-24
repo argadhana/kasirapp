@@ -35,6 +35,10 @@ func (s *service) CreateSupplier(input SupplierInput) (Supplier, error) {
 	rand.Seed(uint64(time.Now().UnixNano()))
 	supplier.Code = rand.Intn(90000) + 10000
 
+	if err := helper.ValidateEmail(supplier.Email); err != nil {
+		return Supplier{}, err
+	}
+
 	if err := helper.ValidatePhoneNumber(supplier.Phone); err != nil {
 		return Supplier{}, err
 	}

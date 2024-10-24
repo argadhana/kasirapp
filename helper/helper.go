@@ -51,3 +51,12 @@ func ValidatePhoneNumber(phone string) error {
 	}
 	return nil
 }
+
+func ValidateEmail(email string) error {
+	// Regular expression to match email addresses
+	re := regexp.MustCompile(`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`)
+	if !re.MatchString(email) {
+		return errors.New("invalid email address")
+	}
+	return nil
+}

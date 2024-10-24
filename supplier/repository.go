@@ -26,32 +26,29 @@ func NewRepository(db *gorm.DB) *repository {
 func (r *repository) Save(supplier Supplier) (Supplier, error) {
 	var availableID *int
 
-	if err := r.db.Transaction(func(tx *gorm.DB) error {
-		if err := tx.Raw("SELECT MIN(id) FROM customers WHERE id NOT IN (SELECT id FROM customers)").Scan(&availableID).Error; err != nil {
-			return err
-		}
-		if availableID != nil {
-			supplier.ID = *availableID
-		} else {
-			var maxID *int
-			if err := r.db.Model(&Supplier{}).Select("MAX(id)").Scan(&maxID).Error; err != nil {
-				return err
-			}
-			if maxID != nil {
-				supplier.ID = *maxID + 1
-			} else {
-				supplier.ID = 1
-			}
-		}
-		if err := tx.Create(&supplier).Error; err != nil {
-			return err
-		}
-		return nil
-	}); err != nil {
+	if err := r.db.Raw("SELECT MIN(id) FROM suppliers WHERE id NOT IN (SELECT id FROM suppliers)").Scan(&availableID).Error; err != nil {
 		return supplier, err
-	} else {
-		return supplier, nil
 	}
+
+	if availableID != nil {
+		supplier.ID = *availableID
+	} else {
+		var maxID *int
+		if err := r.db.Model(&Supplier{}).Select("MAX(id)").Scan(&maxID).Error; err != nil {
+			return supplier, err
+		}
+		if maxID != nil {
+			supplier.ID = *maxID + 1
+		} else {
+			supplier.ID = 1
+		}
+	}
+
+	if err := r.db.Create(&supplier).Error; err != nil {
+		return supplier, err
+	}
+
+	return supplier, nil
 }
 
 func (r *repository) FindByID(ID int) (Supplier, error) {

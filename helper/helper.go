@@ -1,6 +1,11 @@
 package helper
 
-import "github.com/go-playground/validator/v10"
+import (
+	"errors"
+	"regexp"
+
+	"github.com/go-playground/validator/v10"
+)
 
 type Response struct {
 	Meta Meta        `json:"meta"`
@@ -36,4 +41,13 @@ func FormatValidationError(err error) []string {
 	}
 
 	return errors
+}
+
+func ValidatePhoneNumber(phone string) error {
+	// Regular expression to match phone numbers starting with "08" or "628"
+	re := regexp.MustCompile(`^(08|628)[0-9]{8,11}$`)
+	if !re.MatchString(phone) {
+		return errors.New("phone number must start with '08' or '628' and minimum 11 digists and maximum 13 digits long")
+	}
+	return nil
 }

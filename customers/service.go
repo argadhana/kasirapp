@@ -1,8 +1,8 @@
 package customers
 
 import (
+	"api-kasirapp/helper"
 	"errors"
-	"regexp"
 
 	"gorm.io/gorm"
 )
@@ -31,7 +31,7 @@ func (s *service) CreateCustomer(input CustomerInput) (Customer, error) {
 	customer.Phone = input.Phone
 	customer.Email = input.Email
 
-	if err := validatePhoneNumber(customer.Phone); err != nil {
+	if err := helper.ValidatePhoneNumber(customer.Phone); err != nil {
 		return Customer{}, err // Return an error if validation fails
 	}
 
@@ -99,13 +99,4 @@ func (s *service) Delete(ID int) (Customer, error) {
 	}
 
 	return deletedCustomer, nil
-}
-
-func validatePhoneNumber(phone string) error {
-	// Regular expression to match phone numbers starting with "08" or "628"
-	re := regexp.MustCompile(`^(08|628)[0-9]{8,11}$`)
-	if !re.MatchString(phone) {
-		return errors.New("phone number must start with '08' or '628' and minimum 11 digists and maximum 13 digits long")
-	}
-	return nil
 }

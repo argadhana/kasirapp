@@ -1,5 +1,11 @@
 package category
 
+import (
+	"errors"
+
+	"gorm.io/gorm"
+)
+
 type Service interface {
 	Save(input CategoryInput) (Category, error)
 	FindByID(ID int) (Category, error)
@@ -32,6 +38,9 @@ func (s *service) Save(input CategoryInput) (Category, error) {
 func (s *service) FindByID(ID int) (Category, error) {
 	category, err := s.repository.FindByID(ID)
 	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return category, errors.New("category not found")
+		}
 		return category, err
 	}
 

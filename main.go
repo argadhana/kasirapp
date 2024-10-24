@@ -52,7 +52,9 @@ func main() {
 	api.POST("/categories", categoryHandler.CreateCategory)
 
 	api.GET("/categories", categoryHandler.GetCategories)
-	api.GET("/categories/:category_id", categoryHandler.GetCategoryById)
+	api.GET("/categories/:id", categoryHandler.GetCategoryById)
+
+	api.PUT("/categories/:id", categoryHandler.UpdateCategory)
 
 	router.Run()
 }

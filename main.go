@@ -7,6 +7,7 @@ import (
 	"api-kasirapp/handler"
 	"api-kasirapp/helper"
 	"api-kasirapp/product"
+	"api-kasirapp/supplier"
 	"api-kasirapp/user"
 	"fmt"
 	"log"
@@ -40,17 +41,20 @@ func main() {
 	categoryRepository := category.NewRepository(db)
 	productRepository := product.NewRepository(db)
 	customerRepository := customers.NewRepository(db)
+	supplierRepository := supplier.NewRepository(db)
 
 	userService := user.NewService(userRepository)
 	categoryService := category.NewService(categoryRepository)
 	productService := product.NewService(productRepository, categoryRepository)
 	customersService := customers.NewService(customerRepository)
+	supplierService := supplier.NewService(supplierRepository)
 	authService := auth.NewService()
 
 	userHandler := handler.NewUserHandler(userService, authService)
 	categoryHandler := handler.NewCategoryHandler(categoryService)
 	productHandler := handler.NewProductHandler(productService)
 	customerHandler := handler.NewCustomerHandler(customersService)
+	supplierHandler := handler.NewSupplierHandler(supplierService)
 	router := gin.Default()
 
 	api := router.Group("/api/v1")
@@ -60,6 +64,7 @@ func main() {
 	api.POST("/categories", categoryHandler.CreateCategory)
 	api.POST("/products", productHandler.CreateProduct)
 	api.POST("/customers", customerHandler.CreateCustomer)
+	api.POST("/suppliers", supplierHandler.CreateSupplier)
 
 	api.GET("/categories", categoryHandler.GetCategories)
 	api.GET("/categories/:id", categoryHandler.GetCategoryById)
@@ -67,14 +72,18 @@ func main() {
 	api.GET("/products/:id", productHandler.GetProductById)
 	api.GET("/customers", customerHandler.GetCustomers)
 	api.GET("/customers/:id", customerHandler.GetCustomerById)
+	api.GET("/suppliers", supplierHandler.GetSuppliers)
+	api.GET("/suppliers/:id", supplierHandler.GetSupplierById)
 
 	api.PUT("/categories/:id", categoryHandler.UpdateCategory)
 	api.PUT("/products/:id", productHandler.UpdateProduct)
 	api.PUT("/customers/:id", customerHandler.UpdateCustomer)
+	api.PUT("/suppliers/:id", supplierHandler.UpdateSupplier)
 
 	api.DELETE("/categories/:id", categoryHandler.DeleteCategory)
 	api.DELETE("/products/:id", productHandler.DeleteProduct)
 	api.DELETE("/customers/:id", customerHandler.DeleteCustomer)
+	api.DELETE("/suppliers/:id", supplierHandler.DeleteSupplier)
 
 	router.Run()
 }

@@ -1,10 +1,14 @@
 package customers
 
-import "gorm.io/gorm"
+import (
+	"errors"
+
+	"gorm.io/gorm"
+)
 
 type Repository interface {
 	Save(customer Customer) (Customer, error)
-	FindAll() ([]Customer, error)
+	FindAll(limit int, offset int) ([]Customer, error)
 	FindByID(ID int) (Customer, error)
 	Update(customer Customer) (Customer, error)
 	Delete(ID int) (Customer, error)
@@ -49,9 +53,10 @@ func (r *repository) Save(customer Customer) (Customer, error) {
 	}
 }
 
-func (r *repository) FindAll() ([]Customer, error) {
+func (r *repository) FindAll(limit int, offset int) ([]Customer, error) {
 	var customers []Customer
-	err := r.db.Find(&customers).Error
+
+	err := r.db.Limit(limit).Offset(offset).Find(&customers).Error
 	if err != nil {
 		return customers, err
 	}
@@ -63,6 +68,9 @@ func (r *repository) FindByID(ID int) (Customer, error) {
 	var customer Customer
 	err := r.db.Where("id = ?", ID).Find(&customer).Error
 	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return customer, errors.New("customer not found")
+		}
 		return customer, err
 	}
 
@@ -80,7 +88,28 @@ func (r *repository) Update(customer Customer) (Customer, error) {
 
 func (r *repository) Delete(ID int) (Customer, error) {
 	var customer Customer
-	err := r.db.Where("id = ?", ID).Delete(&customer).Error
+	err := r.db.Transaction(func(tx *gorm.DB) error {
+		// Step 1: Find the product to delete
+		if err := tx.Where("id = ?", ID).First(&customer).Error; err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				return errors.New("customer not found")
+			}
+			return err
+		}
+
+		// Step 2: Delete the product
+		if err := tx.Where("id = ?", ID).Delete(&customer).Error; err != nil {
+			return err
+		}
+
+		// Step 3: Update IDs of all products with ID greater than deleted ID
+		if err := tx.Exec("UPDATE products SET id = id - 1 WHERE id > ?", ID).Error; err != nil {
+			return err
+		}
+
+		return nil
+	})
+
 	if err != nil {
 		return customer, err
 	}

@@ -32,7 +32,7 @@ func (h *customerHandler) CreateCustomer(c *gin.Context) {
 
 	newCustomer, err := h.customerService.CreateCustomer(input)
 	if err != nil {
-		response := helper.APIResponse("Create customer failed", http.StatusBadRequest, "error", nil)
+		response := helper.APIResponse("Create customer failed", http.StatusBadRequest, "error", gin.H{"message": err.Error()})
 		c.JSON(http.StatusBadRequest, response)
 		return
 	}
@@ -42,19 +42,27 @@ func (h *customerHandler) CreateCustomer(c *gin.Context) {
 }
 
 func (h *customerHandler) GetCustomers(c *gin.Context) {
-	fetchCustomers, err := h.customerService.FindAll()
+	limitStr := c.Query("limit")
+	offsetStr := c.Query("offset")
+
+	limit, err := strconv.Atoi(limitStr)
+	if err != nil || limit <= 0 {
+		limit = 5
+	}
+
+	offset, err := strconv.Atoi(offsetStr)
+	if err != nil || offset < 0 {
+		offset = 0
+	}
+
+	customers, err := h.customerService.FindAll(limit, offset)
 	if err != nil {
-		if err.Error() == "record not found" {
-			response := helper.APIResponse("Get customers failed", http.StatusNotFound, "error", nil)
-			c.JSON(http.StatusNotFound, response)
-			return
-		}
-		response := helper.APIResponse("Get customers failed", http.StatusBadRequest, "error", nil)
+		response := helper.APIResponse("Get customers failed", http.StatusBadRequest, "error", gin.H{"message": err.Error()})
 		c.JSON(http.StatusBadRequest, response)
 		return
 	}
 
-	response := helper.APIResponse("Success get customers", http.StatusOK, "success", customers.FormatCustomers(fetchCustomers))
+	response := helper.APIResponse("Success get customers", http.StatusOK, "success", customers)
 	c.JSON(http.StatusOK, response)
 }
 
@@ -124,8 +132,8 @@ func (h *customerHandler) DeleteCustomer(c *gin.Context) {
 
 	deleteCustomer, err := h.customerService.Delete(id)
 	if err != nil {
-		response := helper.APIResponse("Delete customer failed", http.StatusBadRequest, "error", nil)
-		c.JSON(http.StatusBadRequest, response)
+		response := helper.APIResponse("Delete customer failed", http.StatusNotFound, "error", gin.H{"message": err.Error()})
+		c.JSON(http.StatusNotFound, response)
 		return
 	}
 

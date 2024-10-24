@@ -78,7 +78,7 @@ func (s *service) Delete(ID int) (Category, error) {
 		return category, err
 	}
 
-	deletedCategory, err := s.repository.Delete(category)
+	deletedCategory, err := s.repository.Delete(ID)
 	if err != nil {
 		return deletedCategory, err
 	}

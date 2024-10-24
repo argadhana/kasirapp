@@ -31,8 +31,12 @@ func (s *service) CreateCustomer(input CustomerInput) (Customer, error) {
 	customer.Phone = input.Phone
 	customer.Email = input.Email
 
+	if err := helper.ValidateEmail(customer.Email); err != nil {
+		return Customer{}, err
+	}
+
 	if err := helper.ValidatePhoneNumber(customer.Phone); err != nil {
-		return Customer{}, err // Return an error if validation fails
+		return Customer{}, err
 	}
 
 	newCustomer, err := s.repository.Save(customer)

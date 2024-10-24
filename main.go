@@ -2,18 +2,20 @@ package main
 
 import (
 	"api-kasirapp/auth"
+	"api-kasirapp/category"
 	"api-kasirapp/handler"
 	"api-kasirapp/helper"
 	"api-kasirapp/user"
 	"fmt"
-	"github.com/gin-gonic/gin"
-	"github.com/golang-jwt/jwt/v5"
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
 	"log"
 	"net/http"
 	"os"
 	"strings"
+
+	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt/v5"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 
 	"github.com/joho/godotenv"
 )
@@ -33,17 +35,26 @@ func main() {
 	}
 
 	userRepository := user.NewRepository(db)
+	categoryRepository := category.NewRepository(db)
 
 	userService := user.NewService(userRepository)
+	categoryService := category.NewService(categoryRepository)
 	authService := auth.NewService()
 
 	userHandler := handler.NewUserHandler(userService, authService)
+	categoryHandler := handler.NewCategoryHandler(categoryService)
 	router := gin.Default()
 
 	api := router.Group("/api/v1")
 	api.POST("/users", userHandler.RegisterUser)
 	api.POST("/sessions", userHandler.Login)
 	api.POST("/email_checkers", userHandler.CheckEmailAvailability)
+	api.POST("/categories", categoryHandler.CreateCategory)
+
+	api.GET("/categories", categoryHandler.GetCategories)
+	api.GET("/categories/:id", categoryHandler.GetCategoryById)
+
+	api.PUT("/categories/:id", categoryHandler.UpdateCategory)
 
 	router.Run()
 }

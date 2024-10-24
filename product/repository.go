@@ -79,6 +79,9 @@ func (r *repository) FindByName(name string) (Product, error) {
 
 	err := r.db.Where("name = ?", name).Find(&product).Error
 	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return product, errors.New("product not found")
+		}
 		return product, err
 	}
 	return product, nil
@@ -107,6 +110,9 @@ func (r *repository) Delete(ID int) (Product, error) {
 	err := r.db.Transaction(func(tx *gorm.DB) error {
 		// Step 1: Find the product to delete
 		if err := tx.Where("id = ?", ID).First(&product).Error; err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				return errors.New("customer not found")
+			}
 			return err
 		}
 

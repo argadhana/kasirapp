@@ -5,6 +5,7 @@ import (
 	"api-kasirapp/category"
 	"api-kasirapp/handler"
 	"api-kasirapp/helper"
+	"api-kasirapp/product"
 	"api-kasirapp/user"
 	"fmt"
 	"log"
@@ -36,13 +37,16 @@ func main() {
 
 	userRepository := user.NewRepository(db)
 	categoryRepository := category.NewRepository(db)
+	productRepository := product.NewRepository(db)
 
 	userService := user.NewService(userRepository)
 	categoryService := category.NewService(categoryRepository)
+	productService := product.NewService(productRepository, categoryRepository)
 	authService := auth.NewService()
 
 	userHandler := handler.NewUserHandler(userService, authService)
 	categoryHandler := handler.NewCategoryHandler(categoryService)
+	productHandler := handler.NewProductHandler(productService)
 	router := gin.Default()
 
 	api := router.Group("/api/v1")
@@ -50,11 +54,18 @@ func main() {
 	api.POST("/sessions", userHandler.Login)
 	api.POST("/email_checkers", userHandler.CheckEmailAvailability)
 	api.POST("/categories", categoryHandler.CreateCategory)
+	api.POST("/products", productHandler.CreateProduct)
 
 	api.GET("/categories", categoryHandler.GetCategories)
 	api.GET("/categories/:id", categoryHandler.GetCategoryById)
+	api.GET("/products", productHandler.GetProducts)
+	api.GET("/products/:id", productHandler.GetProductById)
 
 	api.PUT("/categories/:id", categoryHandler.UpdateCategory)
+	api.PUT("/products/:id", productHandler.UpdateProduct)
+
+	api.DELETE("/categories/:id", categoryHandler.DeleteCategory)
+	api.DELETE("/products/:id", productHandler.DeleteProduct)
 
 	router.Run()
 }
